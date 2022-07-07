@@ -3,5 +3,5 @@ venv/
 #migrations/
 test_config.py
 certificate/
-db.settings.py
+db_settings.py
 .idea/
