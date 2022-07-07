@@ -1,0 +1,7 @@
+__pycache__/
+venv/
+#migrations/
+test_config.py
+certificate/
+db.settings.py
+.idea/
