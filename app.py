@@ -2,7 +2,7 @@ from flask import Flask, request
 import pymysql
 
 
-app = Flask("piuda")
+app = Flask(__name__)
 
 @app.route('/')
 def hello_world():  # put application's code here
@@ -16,4 +16,4 @@ def get_code():
     return 'Hello World!'
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True)
