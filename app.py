@@ -11,8 +11,8 @@ def hello_world():  # put application's code here
 
 @app.route('/code', methods=['POST'])
 def get_code():
-    params = request.json.get('menu')
-    store, menu = params.split(' ')
+    store = request.json.get('매장')
+    menu = request.json.get('메뉴')
     store = Store.query.filter(Store.storeName == store).first()
     if store is not None:
         barcode = Barcode.query.filter((Barcode.menu.like(menu)) & (Barcode.storeName == store)).first()
@@ -24,6 +24,16 @@ def get_code():
     else:
         return jsonify({'status': 'fail',
                         'message': '일치하는 매장을 찾을 수 없습니다.'}), 401
+
+
+@app.route('/stores', methods=['GET'])
+def get_stores():
+    stores = Store.query.all()
+    res = []
+    for s in stores:
+        res.append(s.storeName)
+    return jsonify(res)
+
 
 
 
