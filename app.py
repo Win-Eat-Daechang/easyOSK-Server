@@ -11,8 +11,8 @@ def hello_world():  # put application's code here
 
 @app.route('/code', methods=['GET'])
 def get_code():
-    store = request.args.get('store')
-    menu = request.args.get('menu')
+    store = request.args.get('매장')
+    menu = request.args.get('메뉴')
     if store and menu is not None:
         store = "%{}%".format(store)
         store = Store.query.filter(Store.storeName.like(store)).first()
@@ -36,7 +36,8 @@ def get_stores():
     stores = Store.query.all()
     res = []
     for s in stores:
-        res.append(s.storeName)
+        if s.barcodes is not None:
+            res.append(s.storeName)
     return jsonify(res)
 
 
