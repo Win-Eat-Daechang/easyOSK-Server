@@ -32,7 +32,7 @@ def get_code():
                         'message': 'Invalid parameter inputs'}), 401
 
 @app.route('/stores', methods=['GET'])
-def get_stores():
+def get_available_stores():
     stores = Store.query.all()
     res = []
     for s in stores:
@@ -41,6 +41,20 @@ def get_stores():
     return jsonify(res)
 
 
+@app.route('/menus', methods=['GET'])
+def get_available_menus():
+    store = request.args.get('store')
+    store = "%{}%".format(store)
+    store = Store.query.filter(Store.storeName.like(store)).first()
+    if store is not None:
+        menus = Barcode.query.filter(Barcode.storeName == store)
+        res = []
+        for m in menus:
+            res.append(m.menu)
+        return jsonify(res)
+    else:
+        return jsonify({'status': 'fail',
+                        'message': '일치하는 매장을 찾을 수 없습니다.'}), 401
 
 
 if __name__ == '__main__':
