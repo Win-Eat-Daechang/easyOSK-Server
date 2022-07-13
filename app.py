@@ -41,24 +41,48 @@ def get_available_stores():
     res = []
     for s in stores:
         if s.barcodes is not None:
-            res.append(s.storeName)
+            res.append({"id": s.id, "name": s.storeName})
     return jsonify(res)
 
 
-@app.route('/menus', methods=['GET'])
-def get_available_menus():
-    store = request.args.get('store')
-    store = "%{}%".format(store)
-    store = Store.query.filter(Store.storeName.like(store)).first()
+@app.route('/stores/<int:store_id>', methods=['GET'])
+def get_available_menus(store_id):
+    storeid = store_id
+    store = Store.query.filter(Store.id == storeid).first()
     if store is not None:
         menus = Barcode.query.filter(Barcode.storeName == store)
         res = []
         for m in menus:
-            res.append(m.menu)
+            res.append({"id": m.id, "menu": m.menu})
         return jsonify(res)
     else:
         return jsonify({'status': 'fail',
                         'message': '일치하는 매장을 찾을 수 없습니다.'}), 401
+
+
+@app.route('/stores', methods=['POST'])
+def create_store():
+    storeName = request.json.get('storeName')
+    store = Store(storeName=storeName)
+    db.session.add(store)
+    db.session.commit()
+    res = []
+    res.append({"id": store.id, "name": store.storeName})
+    return jsonify(res)
+
+
+@app.route('/menus', methods=['POST'])
+def create_menu():
+    storeid = request.json.get('storeId')
+    barcode = request.json.get('barcode')
+    menu = request.json.get('menu')
+    store = Store.query.filter(Store.id == storeid).first()
+    barcode = Barcode(barcode=barcode, menu=menu, storeName=store)
+    db.session.add(barcode)
+    db.session.commit()
+    res = []
+    res.append({"id": barcode.id, "name": barcode.menu, "barcode": barcode.barcode, "storeId": store.id})
+    return jsonify(res)
 
 
 if __name__ == '__main__':
