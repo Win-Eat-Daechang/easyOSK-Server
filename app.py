@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 from config import app
 from model import Store, Barcode, db
+
+cors = CORS(app, resources={r'*': {'origins': '*'}})
 
 
 @app.route('/')
@@ -22,14 +25,15 @@ def get_code():
             if barcode is not None:
                 return jsonify({"barcode": barcode.barcode}), 201
             else:
-                return jsonify({ 'status': 'fail',
-                        'message': '메뉴와 일치하는 바코드를 찾을 수 없습니다.'}), 401
+                return jsonify({'status': 'fail',
+                                'message': '메뉴와 일치하는 바코드를 찾을 수 없습니다.'}), 401
         else:
             return jsonify({'status': 'fail',
                             'message': '일치하는 매장을 찾을 수 없습니다.'}), 401
     else:
         return jsonify({'status': 'fail',
                         'message': 'Invalid parameter inputs'}), 401
+
 
 @app.route('/stores', methods=['GET'])
 def get_available_stores():
