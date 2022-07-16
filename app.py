@@ -8,31 +8,29 @@ cors = CORS(app, resources={r'*': {'origins': '*'}})
 
 
 @app.route('/')
-def hello_world():  # put application's code here
+def hello_world():
     return 'Hello World!'
 
 
 @app.route('/code', methods=['GET'])
 def get_code():
-    store = request.args.get('store')
-    menu = request.args.get('menu')
-    if store and menu is not None:
-        store = "%{}%".format(store)
-        store = Store.query.filter(Store.storeName.like(store)).first()
+    store_id = request.args.get('store')
+    menu_id = request.args.get('menu')
+    if store_id and menu_id is not None:
+        store = Store.query.filter(Store.id == store_id).first()
         if store is not None:
-            menu = "%{}%".format(menu)
-            barcode = Barcode.query.filter((Barcode.menu.like(menu)) & (Barcode.storeName == store)).first()
+            barcode = Barcode.query.filter((Barcode.id == menu_id) & (Barcode.storeName == store)).first()
             if barcode is not None:
-                return jsonify({"barcode": barcode.barcode}), 201
+                return jsonify({"barcode": barcode.barcode}), 200
             else:
                 return jsonify({'status': 'fail',
-                                'message': '메뉴와 일치하는 바코드를 찾을 수 없습니다.'}), 401
+                                'message': '메뉴와 일치하는 바코드를 찾을 수 없습니다.'}), 404
         else:
             return jsonify({'status': 'fail',
-                            'message': '일치하는 매장을 찾을 수 없습니다.'}), 401
+                            'message': '일치하는 매장을 찾을 수 없습니다.'}), 404
     else:
         return jsonify({'status': 'fail',
-                        'message': 'Invalid parameter inputs'}), 401
+                        'message': 'Invalid parameter inputs'}), 400
 
 
 @app.route('/stores', methods=['GET'])
@@ -53,11 +51,11 @@ def get_available_menus(store_id):
         menus = Barcode.query.filter(Barcode.storeName == store)
         res = []
         for m in menus:
-            res.append({"id": m.id, "menu": m.menu})
+            res.append({"id": m.id, "name": m.menu})
         return jsonify(res)
     else:
         return jsonify({'status': 'fail',
-                        'message': '일치하는 매장을 찾을 수 없습니다.'}), 401
+                        'message': '일치하는 매장을 찾을 수 없습니다.'}), 404
 
 
 @app.route('/stores', methods=['POST'])
@@ -68,7 +66,7 @@ def create_store():
     db.session.commit()
     res = []
     res.append({"id": store.id, "name": store.storeName})
-    return jsonify(res)
+    return jsonify(res), 201
 
 
 @app.route('/menus', methods=['POST'])
@@ -82,7 +80,7 @@ def create_menu():
     db.session.commit()
     res = []
     res.append({"id": barcode.id, "name": barcode.menu, "barcode": barcode.barcode, "storeId": store.id})
-    return jsonify(res)
+    return jsonify(res), 201
 
 
 if __name__ == '__main__':
